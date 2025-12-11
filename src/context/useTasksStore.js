@@ -61,5 +61,15 @@ export const useTasksStore = create((set, get) => ({
     return Math.round((completed / dayTasks.length) * 100);
   },
 
+  getProgressMessage: () => {
+    const progress = get().getProgress();
+
+    if (progress === 0) return "✨ Empezá cuando quieras, Mika 💖";
+    if (progress < 30) return "🌱  Arranque suave — ¡vos podés!";
+    if (progress < 60) return "🌸  Buen ritmo — seguí así!";
+    if (progress < 90) return "🌼  ¡Muy bien! Casi terminás todo ✨";
+    return "🌟  ¡Completaste casi todo! Orgullo total 💗";
+  },
 }));
+
 
