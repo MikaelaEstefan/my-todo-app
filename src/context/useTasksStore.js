@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 
-export const useTasksStore = create((set) => ({
+export const useTasksStore = create((set, get) => ({
   tasks: {
     Lunes: [],
     Martes: [],
@@ -11,7 +11,6 @@ export const useTasksStore = create((set) => ({
     Viernes: [],
   },
 
-  // ahora incluye el día correctamente
   addTask: (day, text, color) =>
     set((state) => {
       const newTask = {
@@ -42,5 +41,25 @@ export const useTasksStore = create((set) => ({
       return { tasks: updated };
     }),
 
-  progress: 0,
+  getProgress: () => {
+    const tasks = get().tasks;
+    const allTasks = Object.values(tasks).flat();
+
+    if (allTasks.length === 0) return 0;
+
+    const completed = allTasks.filter((t) => t.completed).length;
+    return Math.round((completed / allTasks.length) * 100);
+  },
+
+  getDayProgress: (day) => {
+    const tasks = get().tasks;
+    const dayTasks = tasks[day];
+
+    if (dayTasks.length === 0) return 0;
+
+    const completed = dayTasks.filter((t) => t.completed).length;
+    return Math.round((completed / dayTasks.length) * 100);
+  },
+
 }));
+
