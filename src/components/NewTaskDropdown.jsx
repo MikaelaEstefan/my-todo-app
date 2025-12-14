@@ -8,8 +8,6 @@ export default function NewTaskDropdown() {
   const [text, setText] = useState("");
   const [color, setColor] = useState("#1e293b");
   const [day, setDay] = useState("Lunes");
-
-  // NUEVO
   const [priority, setPriority] = useState("media");
   const [time, setTime] = useState("");
 
@@ -20,15 +18,13 @@ export default function NewTaskDropdown() {
 
     addTask(day, text, color, priority, time);
 
-    // Reset
     setText("");
-    setPriority("media");
     setTime("");
+    setPriority("media");
   }
 
   return (
     <div className="flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-xl">
-      
       {/* Texto */}
       <input
         className="p-2 rounded bg-gray-700 text-white"
@@ -53,9 +49,9 @@ export default function NewTaskDropdown() {
       {/* Hora */}
       <input
         type="time"
-        className="bg-gray-700 text-white p-2 rounded"
         value={time}
         onChange={(e) => setTime(e.target.value)}
+        className="bg-gray-700 text-white p-2 rounded"
       />
 
       {/* Prioridad */}

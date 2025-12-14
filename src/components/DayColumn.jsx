@@ -1,5 +1,5 @@
 import React from "react";
-import TaskButton from "./TaskButton";
+import TaskCard from "./TaskCard";
 import { useTasksStore } from "../context/useTasksStore";
 
 export default function DayColumn({ day }) {
@@ -36,7 +36,7 @@ export default function DayColumn({ day }) {
 
       <div className="flex flex-col gap-3">
         {tasks.map((task) => (
-          <TaskButton key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} />
         ))}
       </div>
     </div>

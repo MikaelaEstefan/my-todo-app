@@ -11,7 +11,7 @@ export const useTasksStore = create((set, get) => ({
     Viernes: [],
   },
 
-  // AGREGAR TAREA con color, prioridad y horario
+  // --- ADD TASK ---
   addTask: (day, text, color, priority = "media", time = "") =>
     set((state) => {
       const newTask = {
@@ -20,78 +20,149 @@ export const useTasksStore = create((set, get) => ({
         color,
         completed: false,
         priority,
-        time, 
+        time,
+        subtasks: [],
       };
-
-      // Ordenar tareas: primero por hora, luego prioridad
-      const sortTasks = (arr) => {
-        const priorityValue = { alta: 1, media: 2, baja: 3 };
-
-        return [...arr].sort((a, b) => {
-          // Si tienen horario, ordenar por hora
-          if (a.time && b.time && a.time !== b.time) {
-            return a.time.localeCompare(b.time);
-          }
-
-          // Si no tienen horario o es igual → ordenar por prioridad
-          return priorityValue[a.priority] - priorityValue[b.priority];
-        });
-      };
-
-      const updatedDay = sortTasks([...state.tasks[day], newTask]);
 
       return {
         tasks: {
           ...state.tasks,
-          [day]: updatedDay,
+          [day]: [...state.tasks[day], newTask].sort(sortTasks),
         },
       };
     }),
 
-  // Toggle de completado
+  // --- TOGGLE TASK ---
   toggleTask: (id) =>
     set((state) => {
-      const updated = {};
+      const tasks = structuredClone(state.tasks);
 
-      Object.keys(state.tasks).forEach((day) => {
-        updated[day] = state.tasks[day].map((t) =>
-          t.id === id ? { ...t, completed: !t.completed } : t
-        );
+      Object.keys(tasks).forEach((day) => {
+        tasks[day] = tasks[day].map((t) => {
+          if (t.id !== id) return t;
+
+          const updated = {
+            ...t,
+            completed: !t.completed,
+          };
+
+          // Marcar subtareas completas si la tarea está completa
+          if (updated.completed) {
+            updated.subtasks = updated.subtasks.map((s) => ({
+              ...s,
+              completed: true,
+            }));
+          }
+
+          return updated;
+        });
       });
 
-      return { tasks: updated };
+      return { tasks };
     }),
 
-  // Calcular progreso semanal
+  // --- ADD SUBTASK ---
+  addSubtask: (taskId, text) =>
+    set((state) => {
+      const tasks = structuredClone(state.tasks);
+
+      Object.keys(tasks).forEach((day) => {
+        tasks[day] = tasks[day].map((t) => {
+          if (t.id !== taskId) return t;
+
+          return {
+            ...t,
+            subtasks: [
+              ...t.subtasks,
+              { id: nanoid(), text, completed: false },
+            ],
+            completed: false,
+          };
+        });
+      });
+
+      return { tasks };
+    }),
+
+  // --- TOGGLE SUBTASK ---
+  toggleSubtask: (taskId, subId) =>
+    set((state) => {
+      const tasks = structuredClone(state.tasks);
+
+      Object.keys(tasks).forEach((day) => {
+        tasks[day] = tasks[day].map((t) => {
+          if (t.id !== taskId) return t;
+
+          const updatedSubtasks = t.subtasks.map((s) =>
+            s.id === subId ? { ...s, completed: !s.completed } : s
+          );
+
+          const allDone = updatedSubtasks.every((s) => s.completed);
+
+          return {
+            ...t,
+            subtasks: updatedSubtasks,
+            completed: allDone,
+          };
+        });
+      });
+
+      return { tasks };
+    }),
+
+  // --- WEEK PROGRESS ---
   getProgress: () => {
     const tasks = get().tasks;
-    const allTasks = Object.values(tasks).flat();
+    const all = Object.values(tasks).flat();
+    if (all.length === 0) return 0;
 
-    if (allTasks.length === 0) return 0;
-
-    const completed = allTasks.filter((t) => t.completed).length;
-    return Math.round((completed / allTasks.length) * 100);
+    const completed = all.filter((t) => t.completed).length;
+    return Math.round((completed / all.length) * 100);
   },
 
-  // Calcular progreso por día
+  // --- DAY PROGRESS ---
   getDayProgress: (day) => {
-    const tasks = get().tasks;
-    const dayTasks = tasks[day];
+    const tasks = get().tasks[day];
+    if (tasks.length === 0) return 0;
 
-    if (dayTasks.length === 0) return 0;
-
-    const completed = dayTasks.filter((t) => t.completed).length;
-    return Math.round((completed / dayTasks.length) * 100);
+    const completed = tasks.filter((t) => t.completed).length;
+    return Math.round((completed / tasks.length) * 100);
   },
 
-  // Mensajes barra semanal
   getProgressMessage: () => {
-    const progress = get().getProgress();
+  const progress = get().getProgress();
 
-    if (progress === 0) return "✨ Empezá cuando quieras 💖";
-    if (progress < 30) return "🌱 Arranque suave — ¡vos podés!";
-    if (progress < 60) return "🌸 Buen ritmo — seguí así!";
-    if (progress < 90) return "🌼 ¡Muy bien! Casi terminás todo ✨";
-    return "🌟 ¡Completaste casi todo! Orgullo total 💗";
-  },
+  if (progress === 0) return "✨ Empezá cuando quieras 💖";
+  if (progress < 30) return "🌱  Arranque suave — ¡vos podés!";
+  if (progress < 60) return "🌸  Buen ritmo — seguí así!";
+  if (progress < 90) return "🌼  ¡Muy bien! Casi terminás todo ✨";
+  return "🌟  ¡Completaste casi todo! Orgullo total 💗";
+},
+
 }));
+
+// -----------------------------------------
+// SORT: ordenar por hora y prioridad
+// -----------------------------------------
+function sortTasks(a, b) {
+  // 1) Ordenar por hora primero (vacías al final)
+  if (a.time && !b.time) return -1;
+  if (!a.time && b.time) return 1;
+
+  if (a.time && b.time) {
+    const tA = a.time.split(":").map(Number);
+    const tB = b.time.split(":").map(Number);
+
+    const dateA = new Date(0, 0, 0, tA[0], tA[1]);
+    const dateB = new Date(0, 0, 0, tB[0], tB[1]);
+
+    if (dateA.getTime() !== dateB.getTime()) {
+      return dateA - dateB;
+    }
+  }
+
+  // 2) Luego prioridad (alta > media > baja)
+  const priorityValue = { alta: 1, media: 2, baja: 3 };
+  return priorityValue[a.priority] - priorityValue[b.priority];
+}
+
