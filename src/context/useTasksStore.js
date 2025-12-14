@@ -32,6 +32,15 @@ export const useTasksStore = create((set, get) => ({
       };
     }),
 
+    // --- REORDER TASKS ---
+  reorderTasks: (day, newTasks) =>
+  set(state => ({
+    tasks: {
+      ...state.tasks,
+      [day]: newTasks,
+    },
+  })),
+
   // --- TOGGLE TASK ---
   toggleTask: (id) =>
     set((state) => {

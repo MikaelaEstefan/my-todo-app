@@ -1,45 +1,52 @@
-import React from "react";
+import {
+  DndContext,
+  closestCenter,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+
 import TaskCard from "./TaskCard";
 import { useTasksStore } from "../context/useTasksStore";
 
 export default function DayColumn({ day }) {
   const tasks = useTasksStore((state) => state.tasks[day] || []);
-  const getDayProgress = useTasksStore((state) => state.getDayProgress);
+  const reorderTasks = useTasksStore((state) => state.reorderTasks);
 
-  const progress = getDayProgress(day);
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
 
-  const getLabel = (p) => {
-    if (p === 0) return "🌱 Empezá cuando quieras";
-    if (p < 30) return "✨ Buen comienzo";
-    if (p < 60) return "🌸 Vas muy bien";
-    if (p < 90) return "🌿 ¡Gran ritmo!";
-    if (p < 100) return "🌼 ¡Casi completo!";
-    return "🏆 Día completado, felicitaciones!";
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = tasks.findIndex(t => t.id === active.id);
+    const newIndex = tasks.findIndex(t => t.id === over.id);
+
+    reorderTasks(day, arrayMove(tasks, oldIndex, newIndex));
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-xl h-full min-h-[300px]">
+    <div className="bg-gray-800 p-4 rounded-xl">
       <h2 className="text-xl font-semibold mb-4">{day}</h2>
 
-      <div className="mb-3">
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-          <div
-            className="bg-pink-400 h-3 transition-all"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-
-        <p className="text-sm mt-1 text-gray-300">
-          {progress}% — {getLabel(progress)}
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </div>
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={tasks.map(t => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-3">
+            {tasks.map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
+
 
