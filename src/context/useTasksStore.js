@@ -32,42 +32,41 @@ export const useTasksStore = create((set, get) => ({
       };
     }),
 
-    // --- REORDER TASKS ---
+  // --- REORDER TASKS ---
   reorderTasks: (day, newTasks) =>
-  set(state => ({
-    tasks: {
-      ...state.tasks,
-      [day]: newTasks,
-    },
-  })),
+    set((state) => ({
+      tasks: {
+        ...state.tasks,
+        [day]: newTasks,
+      },
+    })),
 
   // --- TOGGLE TASK ---
   toggleTask: (id) =>
     set((state) => {
-      const tasks = structuredClone(state.tasks);
+      const tasks = { ...state.tasks };
+      let updated = false;
 
       Object.keys(tasks).forEach((day) => {
         tasks[day] = tasks[day].map((t) => {
           if (t.id !== id) return t;
 
-          const updated = {
+          const newTask = {
             ...t,
             completed: !t.completed,
+            subtasks: t.subtasks.map((s) => ({
+              ...s,
+              completed: !t.completed ? true : s.completed,
+            })),
           };
 
-          // Marcar subtareas completas si la tarea está completa
-          if (updated.completed) {
-            updated.subtasks = updated.subtasks.map((s) => ({
-              ...s,
-              completed: true,
-            }));
-          }
-
-          return updated;
+          updated = true;
+          return newTask;
         });
       });
 
-      return { tasks };
+      // Forzamos nueva referencia → dispara re-render y actualiza ProgressBar
+      return updated ? { tasks: { ...tasks } } : {};
     }),
 
   // --- ADD SUBTASK ---
@@ -81,10 +80,7 @@ export const useTasksStore = create((set, get) => ({
 
           return {
             ...t,
-            subtasks: [
-              ...t.subtasks,
-              { id: nanoid(), text, completed: false },
-            ],
+            subtasks: [...t.subtasks, { id: nanoid(), text, completed: false }],
             completed: false,
           };
         });
@@ -138,16 +134,16 @@ export const useTasksStore = create((set, get) => ({
     return Math.round((completed / tasks.length) * 100);
   },
 
+  // --- WEEK MESSAGE ---
   getProgressMessage: () => {
-  const progress = get().getProgress();
+    const progress = get().getProgress();
 
-  if (progress === 0) return "✨ Empezá cuando quieras 💖";
-  if (progress < 30) return "🌱  Arranque suave — ¡vos podés!";
-  if (progress < 60) return "🌸  Buen ritmo — seguí así!";
-  if (progress < 90) return "🌼  ¡Muy bien! Casi terminás todo ✨";
-  return "🌟  ¡Completaste casi todo! Orgullo total 💗";
-},
-
+    if (progress === 0) return "✨ Empezá cuando quieras 💖";
+    if (progress < 30) return "🌱  Arranque suave — ¡vos podés!";
+    if (progress < 60) return "🌸  Buen ritmo — seguí así!";
+    if (progress < 90) return "🌼  ¡Muy bien! Casi terminás todo ✨";
+    return "🌟  ¡Completaste casi todo! Orgullo total 💗";
+  },
 }));
 
 // -----------------------------------------
@@ -159,12 +155,10 @@ function sortTasks(a, b) {
   if (!a.time && b.time) return 1;
 
   if (a.time && b.time) {
-    const tA = a.time.split(":").map(Number);
-    const tB = b.time.split(":").map(Number);
-
-    const dateA = new Date(0, 0, 0, tA[0], tA[1]);
-    const dateB = new Date(0, 0, 0, tB[0], tB[1]);
-
+    const [hA, mA] = a.time.split(":").map(Number);
+    const [hB, mB] = b.time.split(":").map(Number);
+    const dateA = new Date(0, 0, 0, hA, mA);
+    const dateB = new Date(0, 0, 0, hB, mB);
     if (dateA.getTime() !== dateB.getTime()) {
       return dateA - dateB;
     }
