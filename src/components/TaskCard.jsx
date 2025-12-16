@@ -6,8 +6,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { useTasksStore } from "../context/useTasksStore";
 
 export default function TaskCard({ task }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -18,6 +24,7 @@ export default function TaskCard({ task }) {
   const toggleTask = useTasksStore((s) => s.toggleTask);
   const addSubtask = useTasksStore((s) => s.addSubtask);
   const toggleSubtask = useTasksStore((s) => s.toggleSubtask);
+
   const [subInput, setSubInput] = useState("");
 
   const priorityStyles = {
@@ -30,15 +37,35 @@ export default function TaskCard({ task }) {
     <motion.div
       ref={setNodeRef}
       style={style}
-      layout
+      layout={!isDragging}
       {...attributes}
-      className={`p-4 rounded-xl border border-gray-600 text-white transition-all select-none shadow-md ${
-        task.priority === "alta" ? "font-bold" : ""
-      } ${task.completed ? "opacity-40 saturate-50" : ""}`}
+      className="p-4 rounded-xl border border-gray-600 text-white shadow-md select-none"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{
+        opacity: task.completed ? 0.45 : 1,
+        y: 0,
+        scale: task.completed
+          ? [1, 1.06, 0.96] // ✨ POP al completar
+          : 1,
+      }}
+      transition={{
+        scale: {
+          duration: 0.25,
+          ease: "easeOut",
+        },
+        opacity: { duration: 0.2 },
+      }}
+      whileHover={
+        !isDragging
+          ? {
+              scale: 1.03,
+              boxShadow: "0px 4px 12px rgba(255, 192, 203, 0.3)",
+            }
+          : {}
+      }
       whileDrag={{ scale: 1.05, zIndex: 10 }}
-      transition={{ layout: { duration: 0.25, ease: "easeInOut" } }}
     >
-      {/* HEADER (zona arrastrable + checkbox principal) */}
+      {/* HEADER — zona arrastrable */}
       <div
         className="flex justify-between items-start gap-3 cursor-grab"
         {...listeners}
@@ -46,7 +73,7 @@ export default function TaskCard({ task }) {
         <motion.div
           layout
           className={`text-lg leading-snug ${
-            task.completed ? "line-through opacity-60" : ""
+            task.completed ? "line-through" : ""
           }`}
         >
           {task.text}
@@ -86,11 +113,12 @@ export default function TaskCard({ task }) {
         transition={{ duration: 0.25 }}
       >
         {(task.subtasks ?? []).map((s) => (
-          <label key={s.id} className="flex items-center gap-2 cursor-pointer">
+          <label key={s.id} className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={s.completed}
               onChange={() => toggleSubtask(task.id, s.id)}
+              onClick={(e) => e.stopPropagation()}
             />
             <span
               className={`text-sm ${
@@ -110,14 +138,17 @@ export default function TaskCard({ task }) {
             value={subInput}
             onChange={(e) => setSubInput(e.target.value)}
             onKeyDown={(e) => {
+              e.stopPropagation();
               if (e.key === "Enter" && subInput.trim()) {
                 addSubtask(task.id, subInput);
                 setSubInput("");
               }
             }}
+            onClick={(e) => e.stopPropagation()}
           />
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!subInput.trim()) return;
               addSubtask(task.id, subInput);
               setSubInput("");
@@ -131,4 +162,5 @@ export default function TaskCard({ task }) {
     </motion.div>
   );
 }
+
 
