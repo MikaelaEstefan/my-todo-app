@@ -3,6 +3,9 @@ import { create } from "zustand";
 import { nanoid } from "nanoid";
 
 export const useTasksStore = create((set, get) => ({
+  // --------------------------------
+  // STATE
+  // --------------------------------
   tasks: {
     Lunes: [],
     Martes: [],
@@ -11,7 +14,15 @@ export const useTasksStore = create((set, get) => ({
     Viernes: [],
   },
 
-  // --- ADD TASK ---
+  // Focus / Pomodoro
+  focusMode: false,
+  focusedTaskId: null,
+  timer: 25 * 60, // segundos
+  isBreak: false,
+
+  // --------------------------------
+  // TASK ACTIONS
+  // --------------------------------
   addTask: (day, text, color, priority = "media", time = "") =>
     set((state) => {
       const newTask = {
@@ -27,12 +38,11 @@ export const useTasksStore = create((set, get) => ({
       return {
         tasks: {
           ...state.tasks,
-          [day]: [...state.tasks[day], newTask].sort(sortTasks),
+          [day]: [...state.tasks[day], newTask],
         },
       };
     }),
 
-  // --- REORDER TASKS ---
   reorderTasks: (day, newTasks) =>
     set((state) => ({
       tasks: {
@@ -41,35 +51,33 @@ export const useTasksStore = create((set, get) => ({
       },
     })),
 
-  // --- TOGGLE TASK ---
   toggleTask: (id) =>
     set((state) => {
-      const tasks = { ...state.tasks };
-      let updated = false;
+      const tasks = structuredClone(state.tasks);
 
       Object.keys(tasks).forEach((day) => {
         tasks[day] = tasks[day].map((t) => {
           if (t.id !== id) return t;
 
-          const newTask = {
-            ...t,
-            completed: !t.completed,
-            subtasks: t.subtasks.map((s) => ({
-              ...s,
-              completed: !t.completed ? true : s.completed,
-            })),
-          };
+          const completed = !t.completed;
 
-          updated = true;
-          return newTask;
+          return {
+            ...t,
+            completed,
+            // si marco completa la tarea -> marco todas las subtareas
+            subtasks: completed
+              ? t.subtasks.map((s) => ({ ...s, completed: true }))
+              : t.subtasks,
+          };
         });
       });
 
-      // Forzamos nueva referencia → dispara re-render y actualiza ProgressBar
-      return updated ? { tasks: { ...tasks } } : {};
+      return { tasks };
     }),
 
-  // --- ADD SUBTASK ---
+  // --------------------------------
+  // SUBTASKS
+  // --------------------------------
   addSubtask: (taskId, text) =>
     set((state) => {
       const tasks = structuredClone(state.tasks);
@@ -89,7 +97,6 @@ export const useTasksStore = create((set, get) => ({
       return { tasks };
     }),
 
-  // --- TOGGLE SUBTASK ---
   toggleSubtask: (taskId, subId) =>
     set((state) => {
       const tasks = structuredClone(state.tasks);
@@ -98,15 +105,15 @@ export const useTasksStore = create((set, get) => ({
         tasks[day] = tasks[day].map((t) => {
           if (t.id !== taskId) return t;
 
-          const updatedSubtasks = t.subtasks.map((s) =>
+          const subtasks = t.subtasks.map((s) =>
             s.id === subId ? { ...s, completed: !s.completed } : s
           );
 
-          const allDone = updatedSubtasks.every((s) => s.completed);
+          const allDone = subtasks.length > 0 && subtasks.every((s) => s.completed);
 
           return {
             ...t,
-            subtasks: updatedSubtasks,
+            subtasks,
             completed: allDone,
           };
         });
@@ -115,7 +122,9 @@ export const useTasksStore = create((set, get) => ({
       return { tasks };
     }),
 
-  // --- WEEK PROGRESS ---
+  // --------------------------------
+  // PROGRESS
+  // --------------------------------
   getProgress: () => {
     const tasks = get().tasks;
     const all = Object.values(tasks).flat();
@@ -125,47 +134,51 @@ export const useTasksStore = create((set, get) => ({
     return Math.round((completed / all.length) * 100);
   },
 
-  // --- DAY PROGRESS ---
   getDayProgress: (day) => {
-    const tasks = get().tasks[day];
-    if (tasks.length === 0) return 0;
+    const dayTasks = get().tasks[day] || [];
+    if (dayTasks.length === 0) return 0;
 
-    const completed = tasks.filter((t) => t.completed).length;
-    return Math.round((completed / tasks.length) * 100);
+    const completed = dayTasks.filter((t) => t.completed).length;
+    return Math.round((completed / dayTasks.length) * 100);
   },
 
-  // --- WEEK MESSAGE ---
   getProgressMessage: () => {
     const progress = get().getProgress();
-
     if (progress === 0) return "✨ Empezá cuando quieras 💖";
-    if (progress < 30) return "🌱  Arranque suave — ¡vos podés!";
-    if (progress < 60) return "🌸  Buen ritmo — seguí así!";
-    if (progress < 90) return "🌼  ¡Muy bien! Casi terminás todo ✨";
-    return "🌟  ¡Completaste casi todo! Orgullo total 💗";
+    if (progress < 30) return "🌱 Arranque suave — ¡vos podés!";
+    if (progress < 60) return "🌸 Buen ritmo — seguí así!";
+    if (progress < 90) return "🌼 ¡Muy bien! Casi terminás todo ✨";
+    return "🌟 ¡Completaste casi todo! Orgullo total 💗";
   },
+
+  // --------------------------------
+  // FOCUS MODE API
+  // --------------------------------
+  startFocus: (taskId) =>
+    set(() => ({
+      focusMode: true,
+      focusedTaskId: taskId,
+      timer: 25 * 60,
+      isBreak: false,
+    })),
+
+  stopFocus: () =>
+    set(() => ({
+      focusMode: false,
+      focusedTaskId: null,
+      timer: 25 * 60,
+      isBreak: false,
+    })),
+
+  tick: () =>
+    set((state) => ({
+      timer: Math.max(0, state.timer - 1),
+    })),
+
+  nextPhase: () =>
+    set((state) => ({
+      isBreak: !state.isBreak,
+      timer: !state.isBreak ? 5 * 60 : 25 * 60, // break 5m, focus 25m
+    })),
 }));
-
-// -----------------------------------------
-// SORT: ordenar por hora y prioridad
-// -----------------------------------------
-function sortTasks(a, b) {
-  // 1) Ordenar por hora primero (vacías al final)
-  if (a.time && !b.time) return -1;
-  if (!a.time && b.time) return 1;
-
-  if (a.time && b.time) {
-    const [hA, mA] = a.time.split(":").map(Number);
-    const [hB, mB] = b.time.split(":").map(Number);
-    const dateA = new Date(0, 0, 0, hA, mA);
-    const dateB = new Date(0, 0, 0, hB, mB);
-    if (dateA.getTime() !== dateB.getTime()) {
-      return dateA - dateB;
-    }
-  }
-
-  // 2) Luego prioridad (alta > media > baja)
-  const priorityValue = { alta: 1, media: 2, baja: 3 };
-  return priorityValue[a.priority] - priorityValue[b.priority];
-}
 

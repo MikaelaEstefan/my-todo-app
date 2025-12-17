@@ -2,6 +2,9 @@ import React from "react";
 import DayColumn from "./components/DayColumn";
 import NewTaskDropdown from "./components/NewTaskDropdown";
 import ProgressBar from "./components/ProgressBar";
+import FocusTimer from "./components/FocusTimer";
+import FocusOverlay from "./components/FocusOverlay";
+
 
 export default function App() {
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
@@ -19,6 +22,8 @@ export default function App() {
           <DayColumn key={day} day={day} />
         ))}
       </div>
+       <FocusOverlay />
+      <FocusTimer />
     </div>
   );
 }
