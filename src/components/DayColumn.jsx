@@ -1,3 +1,4 @@
+// src/components/DayColumn.jsx
 import {
   DndContext,
   closestCenter,
@@ -11,17 +12,23 @@ import {
 import TaskCard from "./TaskCard";
 import { useTasksStore } from "../context/useTasksStore";
 
-export default function DayColumn({ day }) {
+export default function DayColumn({ day, filter }) {
   const tasks = useTasksStore((state) => state.tasks[day] || []);
   const reorderTasks = useTasksStore((state) => state.reorderTasks);
 
+  // 🔍 FILTRADO
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "pending") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true; // all
+  });
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
-    const oldIndex = tasks.findIndex(t => t.id === active.id);
-    const newIndex = tasks.findIndex(t => t.id === over.id);
+    const oldIndex = tasks.findIndex((t) => t.id === active.id);
+    const newIndex = tasks.findIndex((t) => t.id === over.id);
 
     reorderTasks(day, arrayMove(tasks, oldIndex, newIndex));
   };
@@ -35,11 +42,11 @@ export default function DayColumn({ day }) {
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={tasks.map(t => t.id)}
+          items={filteredTasks.map((t) => t.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col gap-3">
-            {tasks.map(task => (
+            {filteredTasks.map((task) => (
               <TaskCard key={task.id} task={task} />
             ))}
           </div>
