@@ -25,6 +25,7 @@ export const useTasksStore = create(
             time,
             subtasks: [],
             focus: false,
+            collapsed: false, 
           };
 
           return {
@@ -42,6 +43,33 @@ export const useTasksStore = create(
             [day]: newTasks,
           },
         })),
+
+        resetWeek: () =>
+          set({
+            tasks: {
+              Lunes: [],
+              Martes: [],
+              Miércoles: [],
+              Jueves: [],
+              Viernes: [],
+            },
+          }),
+
+          toggleCollapse: (taskId) =>
+            set((state) => {
+              const tasks = structuredClone(state.tasks);
+
+              Object.keys(tasks).forEach((day) => {
+                tasks[day] = tasks[day].map((t) =>
+                  t.id === taskId
+                    ? { ...t, collapsed: !t.collapsed }
+                    : t
+                );
+              });
+
+              return { tasks };
+            }),
+
 
       toggleTask: (id) =>
         set((state) => {

@@ -16,6 +16,18 @@ export default function App() {
 
       <ProgressBar />
 
+      <button
+          onClick={() => {
+            if (confirm("¿Resetear toda la semana?")) {
+              resetWeek();
+            }
+          }}
+          className="text-sm px-3 py-1 rounded bg-red-500/20 text-red-300 hover:bg-red-500/30"
+        >
+          Reset semana
+        </button>
+
+        
       {/* FILTROS */}
       <div className="flex gap-2 justify-center">
         <FilterButton

@@ -1,5 +1,5 @@
 // src/components/TaskCard.jsx
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -19,6 +19,7 @@ export default function TaskCard({ task }) {
   const addSubtask = useTasksStore((s) => s.addSubtask);
   const toggleSubtask = useTasksStore((s) => s.toggleSubtask);
   const startFocus = useTasksStore((s) => s.startFocus);
+  const toggleCollapse = useTasksStore((s) => s.toggleCollapse);
 
   const [subInput, setSubInput] = useState("");
 
@@ -27,6 +28,9 @@ export default function TaskCard({ task }) {
     media: "bg-pink-500/30 text-pink-200",
     baja: "bg-green-500/30 text-green-200",
   };
+
+  const subtasks = task.subtasks ?? [];
+  const hasSubtasks = subtasks.length > 0;
 
   return (
     <motion.div
@@ -72,9 +76,7 @@ export default function TaskCard({ task }) {
       </div>
 
       {/* META */}
-      {task.time && (
-        <div className="text-sm opacity-80 mt-1">⏰ {task.time}</div>
-      )}
+      {task.time && <div className="text-sm opacity-80 mt-1">⏰ {task.time}</div>}
 
       <div
         className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${
@@ -86,8 +88,8 @@ export default function TaskCard({ task }) {
         {task.priority === "baja" && "🌿 Baja"}
       </div>
 
-      {/* FOCUS BUTTON */}
-      <div className="mt-3">
+      {/* ACTIONS */}
+      <div className="mt-3 flex items-center gap-3">
         <button
           className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-sm"
           onClick={(e) => {
@@ -97,55 +99,88 @@ export default function TaskCard({ task }) {
         >
           🧘‍♀️ Focus
         </button>
-      </div>
 
-      {/* SUBTASKS */}
-      <motion.div layout className="mt-4 pl-4 border-l border-white/30 space-y-1">
-        {(task.subtasks ?? []).map((s) => (
-          <label key={s.id} className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={s.completed}
-              onChange={() => toggleSubtask(task.id, s.id)}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <span className={`text-sm ${s.completed ? "line-through opacity-60" : ""}`}>
-              {s.text}
-            </span>
-          </label>
-        ))}
-
-        {/* ADD SUBTASK */}
-        <div className="flex gap-2 pt-2">
-          <input
-            className="p-1 rounded bg-gray-700 text-white flex-1 text-sm"
-            placeholder="Nueva subtarea…"
-            value={subInput}
-            onChange={(e) => setSubInput(e.target.value)}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-              if (e.key === "Enter" && subInput.trim()) {
-                addSubtask(task.id, subInput.trim());
-                setSubInput("");
-              }
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          />
+        {hasSubtasks && (
           <button
-            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              if (!subInput.trim()) return;
-              addSubtask(task.id, subInput.trim());
-              setSubInput("");
+              toggleCollapse(task.id);
             }}
-            className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+            className="text-xs opacity-70 hover:opacity-100"
           >
-            +
+            {task.collapsed ? "▶ Mostrar subtareas" : "▼ Ocultar subtareas"}
           </button>
-        </div>
-      </motion.div>
+        )}
+      </div>
+
+      {/* SUBTASKS (COLAPSABLES) */}
+      <AnimatePresence initial={false}>
+        {!task.collapsed && (
+          <motion.div
+            key="subtasks"
+            layout
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-4 pl-4 border-l border-white/30 space-y-1 overflow-hidden"
+          >
+            {subtasks.map((s) => (
+              <label
+                key={s.id}
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="checkbox"
+                  checked={s.completed}
+                  onChange={() => toggleSubtask(task.id, s.id)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <span
+                  className={`text-sm ${
+                    s.completed ? "line-through opacity-60" : ""
+                  }`}
+                >
+                  {s.text}
+                </span>
+              </label>
+            ))}
+
+            {/* ADD SUBTASK */}
+            <div className="flex gap-2 pt-2">
+              <input
+                className="p-1 rounded bg-gray-700 text-white flex-1 text-sm"
+                placeholder="Nueva subtarea…"
+                value={subInput}
+                onChange={(e) => setSubInput(e.target.value)}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === "Enter" && subInput.trim()) {
+                    addSubtask(task.id, subInput.trim());
+                    setSubInput("");
+                  }
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!subInput.trim()) return;
+                  addSubtask(task.id, subInput.trim());
+                  setSubInput("");
+                }}
+                className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+              >
+                +
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
