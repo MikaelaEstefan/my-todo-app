@@ -1,7 +1,35 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --bg-main: #1C1A22;
+    --bg-panel: #262331;
+    --bg-card: #2F2B3C;
+
+    --pink-main: #E58EB2;
+    --pink-strong: #D16C8A;
+    --pink-soft: #F3C1D6;
+
+    --lavender: #B8A7E4;
+    --green-soft: #9ED6B3;
+
+    --text-main: #F4F2F7;
+    --text-muted: #B8AEB6;
+
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --glow-pink: rgba(229, 142, 178, 0.35);
+  }
+
   body {
-    @apply bg-gray-900 text-white;
+    @apply bg-[var(--bg-main)] text-[var(--text-main)];
+  }
+}
+
+@layer utilities {
+  .shadow-bloomly {
+    box-shadow:
+      0 0 0 1px var(--border-soft),
+      0 12px 30px rgba(0, 0, 0, 0.45),
+      0 0 24px var(--glow-pink);
   }
 }

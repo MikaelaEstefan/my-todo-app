@@ -1,15 +1,15 @@
-// src/components/NewTaskDropdown.jsx
 import React, { useState } from "react";
 import { useTasksStore } from "../context/useTasksStore";
+import { TASK_COLORS } from "../constants/taskColors";
 
 export default function NewTaskDropdown() {
   const addTask = useTasksStore((state) => state.addTask);
 
   const [text, setText] = useState("");
-  const [color, setColor] = useState("#1e293b");
   const [day, setDay] = useState("Lunes");
   const [priority, setPriority] = useState("media");
   const [time, setTime] = useState("");
+  const [color, setColor] = useState(TASK_COLORS[0].value);
 
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -21,21 +21,40 @@ export default function NewTaskDropdown() {
     setText("");
     setTime("");
     setPriority("media");
+    setColor(TASK_COLORS[0].value);
   }
 
   return (
-    <div className="flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-xl">
-      {/* Texto */}
+    <div className="flex flex-wrap items-center gap-4">
+
+      {/* TEXTO */}
       <input
-        className="p-2 rounded bg-gray-700 text-white"
+        className="
+          px-3 py-2
+          rounded-lg
+          bg-[var(--bg-card)]
+          text-[var(--text-main)]
+          placeholder:text-[var(--text-muted)]
+          border border-[var(--border-soft)]
+          focus:outline-none
+          focus:border-[var(--pink-main)]
+        "
         placeholder="Nueva tarea…"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
-      {/* Día */}
+      {/* DÍA */}
       <select
-        className="bg-gray-700 text-white p-2 rounded"
+        className="
+          px-3 py-2
+          rounded-lg
+          bg-[var(--bg-card)]
+          text-[var(--text-main)]
+          border border-[var(--border-soft)]
+          focus:outline-none
+          focus:border-[var(--pink-main)]
+        "
         value={day}
         onChange={(e) => setDay(e.target.value)}
       >
@@ -46,17 +65,33 @@ export default function NewTaskDropdown() {
         ))}
       </select>
 
-      {/* Hora */}
+      {/* HORA */}
       <input
         type="time"
         value={time}
         onChange={(e) => setTime(e.target.value)}
-        className="bg-gray-700 text-white p-2 rounded"
+        className="
+          px-3 py-2
+          rounded-lg
+          bg-[var(--bg-card)]
+          text-[var(--text-main)]
+          border border-[var(--border-soft)]
+          focus:outline-none
+          focus:border-[var(--pink-main)]
+        "
       />
 
-      {/* Prioridad */}
+      {/* PRIORIDAD */}
       <select
-        className="bg-gray-700 text-white p-2 rounded"
+        className="
+          px-3 py-2
+          rounded-lg
+          bg-[var(--bg-card)]
+          text-[var(--text-main)]
+          border border-[var(--border-soft)]
+          focus:outline-none
+          focus:border-[var(--pink-main)]
+        "
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
       >
@@ -65,22 +100,47 @@ export default function NewTaskDropdown() {
         <option value="baja">🌿 Baja</option>
       </select>
 
-      {/* Color */}
-      <input
-        type="color"
-        value={color}
-        onChange={(e) => setColor(e.target.value)}
-        className="w-10 h-10 rounded cursor-pointer"
-      />
+      {/* PALETA DE COLORES */}
+      <div className="flex items-center gap-2">
+        {TASK_COLORS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => setColor(c.value)}
+            className={`
+              w-7 h-7
+              rounded-full
+              border
+              transition
+              ${
+                color === c.value
+                  ? "ring-2 ring-[var(--pink-main)]"
+                  : "border-[var(--border-soft)]"
+              }
+            `}
+            style={{ backgroundColor: c.value }}
+            title={c.label}
+          />
+        ))}
+      </div>
 
-      {/* Botón */}
+      {/* BOTÓN AGREGAR */}
       <button
         onClick={handleAdd}
-        className="px-4 py-2 bg-blue-500 rounded text-white"
+        className="
+          px-6 py-2.5
+          rounded-full
+          bg-[var(--pink-main)]
+          text-white
+          font-semibold
+          hover:bg-[var(--pink-strong)]
+          transition
+        "
       >
         Agregar
       </button>
     </div>
   );
 }
+
 

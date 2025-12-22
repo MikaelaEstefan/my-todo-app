@@ -12,7 +12,7 @@ export default function TaskCard({ task }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    backgroundColor: task.color,
+    backgroundColor: task.color || "var(--bg-card)",
   };
 
   const toggleTask = useTasksStore((s) => s.toggleTask);
@@ -23,12 +23,6 @@ export default function TaskCard({ task }) {
 
   const [subInput, setSubInput] = useState("");
 
-  const priorityStyles = {
-    alta: "bg-red-500/30 text-red-200",
-    media: "bg-pink-500/30 text-pink-200",
-    baja: "bg-green-500/30 text-green-200",
-  };
-
   const subtasks = task.subtasks ?? [];
   const hasSubtasks = subtasks.length > 0;
 
@@ -38,64 +32,73 @@ export default function TaskCard({ task }) {
       style={style}
       layout
       {...attributes}
-      className={`p-4 rounded-xl border border-gray-600 text-white transition-all select-none shadow-md ${
-        task.priority === "alta" ? "font-bold" : ""
-      } ${task.completed ? "opacity-40 saturate-50" : ""}`}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0px 4px 12px rgba(255, 192, 203, 0.25)",
-      }}
+      whileHover={{ scale: 1.015 }}
       whileDrag={{ scale: 1.03, zIndex: 10 }}
       transition={{ type: "spring", stiffness: 220, damping: 22 }}
+      className={`
+        rounded-2xl
+        p-4
+        text-[var(--text-main)]
+        select-none
+        transition-all
+        ${task.completed ? "opacity-50 saturate-50" : ""}
+      `}
     >
-      {/* HEADER = DRAG HANDLE */}
+      {/* HEADER = DRAG */}
       <div
         className="flex justify-between items-start gap-3 cursor-grab"
         {...listeners}
       >
-        <motion.div
-          layout
-          className={`text-lg leading-snug ${
+        <div
+          className={`text-base font-medium leading-snug ${
             task.completed ? "line-through opacity-60" : ""
           }`}
         >
           {task.text}
-        </motion.div>
+        </div>
 
-        <motion.input
+        <input
           type="checkbox"
           checked={task.completed}
           onChange={() => toggleTask(task.id)}
-          className="w-5 h-5 mt-1 cursor-pointer"
-          whileTap={{ scale: 0.85 }}
-          transition={{ type: "spring", stiffness: 400, damping: 16 }}
+          className="w-5 h-5 mt-1 cursor-pointer accent-[var(--pink-main)]"
           onClick={(e) => e.stopPropagation()}
         />
       </div>
 
       {/* META */}
-      {task.time && <div className="text-sm opacity-80 mt-1">⏰ {task.time}</div>}
+      {task.time && (
+        <div className="text-sm text-[var(--text-muted)] mt-1">
+          ⏰ {task.time}
+        </div>
+      )}
 
-      <div
-        className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${
-          priorityStyles[task.priority]
-        }`}
-      >
+      {/* PRIORITY */}
+      <div className="mt-2 text-xs inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10">
         {task.priority === "alta" && "🔥 Alta"}
         {task.priority === "media" && "🌸 Media"}
         {task.priority === "baja" && "🌿 Baja"}
       </div>
 
       {/* ACTIONS */}
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-4 flex items-center gap-3">
         <button
-          className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-sm"
           onClick={(e) => {
             e.stopPropagation();
             startFocus(task.id);
           }}
+          className="
+            px-4 py-1.5
+            rounded-full
+            text-sm
+            font-medium
+            bg-[var(--pink-main)]/20
+            text-[var(--pink-main)]
+            hover:bg-[var(--pink-main)]/30
+            transition
+          "
         >
           🧘‍♀️ Focus
         </button>
@@ -106,40 +109,38 @@ export default function TaskCard({ task }) {
               e.stopPropagation();
               toggleCollapse(task.id);
             }}
-            className="text-xs opacity-70 hover:opacity-100"
+            className="text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
           >
             {task.collapsed ? "▶ Mostrar subtareas" : "▼ Ocultar subtareas"}
           </button>
         )}
       </div>
 
-      {/* SUBTASKS (COLAPSABLES) */}
+      {/* SUBTASKS */}
       <AnimatePresence initial={false}>
         {!task.collapsed && (
           <motion.div
-            key="subtasks"
             layout
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-4 pl-4 border-l border-white/30 space-y-1 overflow-hidden"
+            className="mt-4 pl-4 border-l border-white/10 space-y-2 overflow-hidden"
           >
             {subtasks.map((s) => (
               <label
                 key={s.id}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 text-sm cursor-pointer"
                 onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
               >
                 <input
                   type="checkbox"
                   checked={s.completed}
                   onChange={() => toggleSubtask(task.id, s.id)}
-                  onClick={(e) => e.stopPropagation()}
+                  className="accent-[var(--pink-main)]"
                 />
                 <span
-                  className={`text-sm ${
+                  className={`${
                     s.completed ? "line-through opacity-60" : ""
                   }`}
                 >
@@ -151,7 +152,18 @@ export default function TaskCard({ task }) {
             {/* ADD SUBTASK */}
             <div className="flex gap-2 pt-2">
               <input
-                className="p-1 rounded bg-gray-700 text-white flex-1 text-sm"
+                className="
+                  flex-1
+                  px-2 py-1
+                  rounded-md
+                  bg-[var(--bg-panel)]
+                  text-sm
+                  text-[var(--text-main)]
+                  placeholder:text-[var(--text-muted)]
+                  border border-[var(--border-soft)]
+                  focus:outline-none
+                  focus:border-[var(--pink-main)]
+                "
                 placeholder="Nueva subtarea…"
                 value={subInput}
                 onChange={(e) => setSubInput(e.target.value)}
@@ -162,18 +174,25 @@ export default function TaskCard({ task }) {
                     setSubInput("");
                   }
                 }}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
               />
+
               <button
-                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!subInput.trim()) return;
                   addSubtask(task.id, subInput.trim());
                   setSubInput("");
                 }}
-                className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+                className="
+                  px-3
+                  rounded-md
+                  bg-[var(--pink-main)]
+                  text-white
+                  text-sm
+                  font-semibold
+                  hover:bg-[var(--pink-strong)]
+                  transition
+                "
               >
                 +
               </button>
@@ -184,5 +203,6 @@ export default function TaskCard({ task }) {
     </motion.div>
   );
 }
+
 
 

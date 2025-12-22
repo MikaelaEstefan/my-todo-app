@@ -3,11 +3,24 @@ export default function FilterButton({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
+      className={`
+        px-6 py-3
+        rounded-full
+        text-base
+        font-semibold
+        transition-colors
         ${
           active
-            ? "bg-pink-500 text-white shadow-md scale-105"
-            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            ? `
+              bg-[var(--pink-main)]
+              text-white
+            `
+            : `
+              bg-[var(--bg-panel)]
+              text-[var(--text-muted)]
+              hover:text-[var(--text-main)]
+              hover:bg-[var(--bg-card)]
+            `
         }
       `}
     >
