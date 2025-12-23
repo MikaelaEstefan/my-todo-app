@@ -5,6 +5,9 @@ import { nanoid } from "nanoid";
 export const useTasksStore = create(
   persist(
     (set, get) => ({
+      // ======================
+      // STATE BASE
+      // ======================
       tasks: {
         Lunes: [],
         Martes: [],
@@ -13,7 +16,14 @@ export const useTasksStore = create(
         Viernes: [],
       },
 
-      // -------- TASKS --------
+      // 👉 NUEVO: FOCUS MODE STATE
+      focusMode: false,
+      focusedTaskId: null,
+      timer: 25 * 60, // 25 minutos (por ahora fijo)
+
+      // ======================
+      // TASKS
+      // ======================
       addTask: (day, text, color, priority = "media", time = "") =>
         set((state) => {
           const newTask = {
@@ -24,8 +34,7 @@ export const useTasksStore = create(
             priority,
             time,
             subtasks: [],
-            focus: false,
-            collapsed: false, 
+            collapsed: false,
           };
 
           return {
@@ -44,32 +53,34 @@ export const useTasksStore = create(
           },
         })),
 
-        resetWeek: () =>
-          set({
-            tasks: {
-              Lunes: [],
-              Martes: [],
-              Miércoles: [],
-              Jueves: [],
-              Viernes: [],
-            },
-          }),
+      resetWeek: () =>
+        set({
+          tasks: {
+            Lunes: [],
+            Martes: [],
+            Miércoles: [],
+            Jueves: [],
+            Viernes: [],
+          },
+          focusMode: false,
+          focusedTaskId: null,
+          timer: 25 * 60,
+        }),
 
-          toggleCollapse: (taskId) =>
-            set((state) => {
-              const tasks = structuredClone(state.tasks);
+      toggleCollapse: (taskId) =>
+        set((state) => {
+          const tasks = structuredClone(state.tasks);
 
-              Object.keys(tasks).forEach((day) => {
-                tasks[day] = tasks[day].map((t) =>
-                  t.id === taskId
-                    ? { ...t, collapsed: !t.collapsed }
-                    : t
-                );
-              });
+          Object.keys(tasks).forEach((day) => {
+            tasks[day] = tasks[day].map((t) =>
+              t.id === taskId
+                ? { ...t, collapsed: !t.collapsed }
+                : t
+            );
+          });
 
-              return { tasks };
-            }),
-
+          return { tasks };
+        }),
 
       toggleTask: (id) =>
         set((state) => {
@@ -93,7 +104,9 @@ export const useTasksStore = create(
           return { tasks };
         }),
 
-      // -------- SUBTASKS --------
+      // ======================
+      // SUBTASKS
+      // ======================
       addSubtask: (taskId, text) =>
         set((state) => {
           const tasks = structuredClone(state.tasks);
@@ -139,7 +152,47 @@ export const useTasksStore = create(
           return { tasks };
         }),
 
-      // -------- PROGRESS --------
+      // ======================
+      // FOCUS MODE (NUEVO)
+      // ======================
+      startFocus: (taskId) =>
+        set({
+          focusMode: true,
+          focusedTaskId: taskId,
+          timer: 25 * 60,
+          isPaused: false,
+        }),
+
+      stopFocus: () =>
+        set({
+          focusMode: false,
+          focusedTaskId: null,
+          timer: 25 * 60,
+          isPaused: false,
+        }),
+
+        pauseFocus: () =>
+          set({
+            isPaused: true,
+          }),
+
+        resumeFocus: () =>
+          set({
+            isPaused: false,
+          }),
+
+        tick: () =>
+          set((state) => {
+            if (state.isPaused || !state.focusMode) return state;
+            return {
+              timer: Math.max(state.timer - 1, 0),
+            };
+          }),
+
+
+      // ======================
+      // PROGRESS
+      // ======================
       getProgress: () => {
         const all = Object.values(get().tasks).flat();
         if (!all.length) return 0;
@@ -167,8 +220,9 @@ export const useTasksStore = create(
       },
     }),
     {
-      name: "my-todo-app-storage", // 🔑 clave en localStorage
+      name: "my-todo-app-storage",
     }
   )
 );
+
 

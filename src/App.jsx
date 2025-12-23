@@ -43,9 +43,9 @@ export default function App() {
           }}
           className="
             self-center
-            text-xs
-            px-4
-            py-1.5
+            text-s
+            px-6
+            py-3
             rounded-full
             bg-[var(--pink-main)]/10
             text-[var(--pink-main)]

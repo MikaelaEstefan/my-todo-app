@@ -7,37 +7,40 @@ export default function ProgressBar() {
   const message = useTasksStore((state) => state.getProgressMessage());
 
   return (
-    <div className="flex flex-col items-center w-full gap-2">
+    <div className="flex flex-col items-center w-full gap-4 relative">
       {/* CONTENEDOR */}
-      <div className="w-full bg-gray-700 h-3 rounded-xl overflow-hidden relative">
+      <div
+        className="
+          w-full
+          h-4
+          rounded-full
+          bg-[var(--bg-panel)]
+          overflow-hidden
+        "
+      >
         {/* FILL */}
         <motion.div
-          className="h-full bg-green-400 rounded-xl"
+          className="h-full rounded-full pointer-events-none"
           initial={{ width: 0 }}
-          animate={{
-            width: `${progress}%`,
-            boxShadow:
-              progress > 0
-                ? "0 0 12px rgba(74, 222, 128, 0.8)"
-                : "none",
-          }}
-          transition={{
-            width: { duration: 0.5, ease: "easeInOut" },
-            boxShadow: { duration: 0.3 },
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          style={{
+            background:
+              "linear-gradient(90deg, var(--pink-main), #9F7AEA)",
           }}
         />
 
-        {/* PULSO SUAVE */}
+        {/* BRILLO SUAVE */}
         {progress > 0 && (
           <motion.div
-            key={progress} // 👈 fuerza animación al cambiar
-            className="absolute inset-0 rounded-xl"
-            initial={{ opacity: 0.4 }}
+            key={progress}
+            className="absolute inset-0 rounded-full pointer-events-none"
+            initial={{ opacity: 0.25 }}
             animate={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             style={{
               background:
-                "linear-gradient(90deg, rgba(255,255,255,0.4), transparent)",
+                "linear-gradient(90deg, rgba(255,255,255,0.35), transparent)",
             }}
           />
         )}
@@ -49,9 +52,17 @@ export default function ProgressBar() {
         initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="text-gray-300 text-sm text-center"
+        className="
+          text-base
+          text-[var(--text-muted)]
+          text-center
+          leading-snug
+        "
       >
-        {progress}% — {message}
+        <span className="text-[var(--text-main)] font-semibold">
+          {progress}%
+        </span>{" "}
+        — {message}
       </motion.p>
     </div>
   );

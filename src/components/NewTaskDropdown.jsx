@@ -1,3 +1,4 @@
+// src/components/NewTaskDropdown.jsx
 import React, { useState } from "react";
 import { useTasksStore } from "../context/useTasksStore";
 import { TASK_COLORS } from "../constants/taskColors";
@@ -26,11 +27,10 @@ export default function NewTaskDropdown() {
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-
       {/* TEXTO */}
       <input
         className="
-          px-3 py-2
+          px-4 py-2.5
           rounded-lg
           bg-[var(--bg-card)]
           text-[var(--text-main)]
@@ -38,6 +38,8 @@ export default function NewTaskDropdown() {
           border border-[var(--border-soft)]
           focus:outline-none
           focus:border-[var(--pink-main)]
+          flex-1
+          min-w-[220px]
         "
         placeholder="Nueva tarea…"
         value={text}
@@ -47,7 +49,7 @@ export default function NewTaskDropdown() {
       {/* DÍA */}
       <select
         className="
-          px-3 py-2
+          px-3 py-2.5
           rounded-lg
           bg-[var(--bg-card)]
           text-[var(--text-main)]
@@ -71,7 +73,7 @@ export default function NewTaskDropdown() {
         value={time}
         onChange={(e) => setTime(e.target.value)}
         className="
-          px-3 py-2
+          px-3 py-2.5
           rounded-lg
           bg-[var(--bg-card)]
           text-[var(--text-main)]
@@ -84,7 +86,7 @@ export default function NewTaskDropdown() {
       {/* PRIORIDAD */}
       <select
         className="
-          px-3 py-2
+          px-3 py-2.5
           rounded-lg
           bg-[var(--bg-card)]
           text-[var(--text-main)]
@@ -106,12 +108,16 @@ export default function NewTaskDropdown() {
           <button
             key={c.id}
             type="button"
+            aria-label={c.label}
             onClick={() => setColor(c.value)}
             className={`
               w-7 h-7
               rounded-full
               border
               transition
+              focus:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--pink-main)]
               ${
                 color === c.value
                   ? "ring-2 ring-[var(--pink-main)]"
@@ -128,13 +134,16 @@ export default function NewTaskDropdown() {
       <button
         onClick={handleAdd}
         className="
-          px-6 py-2.5
+          px-7 py-2.5
           rounded-full
           bg-[var(--pink-main)]
           text-white
           font-semibold
           hover:bg-[var(--pink-strong)]
           transition
+          focus:outline-none
+          focus-visible:ring-2
+          focus-visible:ring-[var(--pink-main)]/50
         "
       >
         Agregar
@@ -142,5 +151,6 @@ export default function NewTaskDropdown() {
     </div>
   );
 }
+
 
 

@@ -39,20 +39,20 @@ export default function TaskCard({ task }) {
       transition={{ type: "spring", stiffness: 220, damping: 22 }}
       className={`
         rounded-2xl
-        p-4
+        p-5
         text-[var(--text-main)]
         select-none
         transition-all
         ${task.completed ? "opacity-50 saturate-50" : ""}
       `}
     >
-      {/* HEADER = DRAG */}
+      {/* HEADER */}
       <div
         className="flex justify-between items-start gap-3 cursor-grab"
         {...listeners}
       >
         <div
-          className={`text-base font-medium leading-snug ${
+          className={`text-lg font-semibold leading-snug ${
             task.completed ? "line-through opacity-60" : ""
           }`}
         >
@@ -70,30 +70,30 @@ export default function TaskCard({ task }) {
 
       {/* META */}
       {task.time && (
-        <div className="text-sm text-[var(--text-muted)] mt-1">
+        <div className="text-sm text-[var(--text-main)]/80 mt-1">
           ⏰ {task.time}
         </div>
       )}
 
       {/* PRIORITY */}
-      <div className="mt-2 text-xs inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10">
+      <div className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm">
         {task.priority === "alta" && "🔥 Alta"}
         {task.priority === "media" && "🌸 Media"}
         {task.priority === "baja" && "🌿 Baja"}
       </div>
 
       {/* ACTIONS */}
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-5 flex items-center gap-4">
         <button
           onClick={(e) => {
             e.stopPropagation();
             startFocus(task.id);
           }}
           className="
-            px-4 py-1.5
+            px-5 py-2
             rounded-full
             text-sm
-            font-medium
+            font-semibold
             bg-[var(--pink-main)]/20
             text-[var(--pink-main)]
             hover:bg-[var(--pink-main)]/30
@@ -109,7 +109,7 @@ export default function TaskCard({ task }) {
               e.stopPropagation();
               toggleCollapse(task.id);
             }}
-            className="text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
+            className="text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
           >
             {task.collapsed ? "▶ Mostrar subtareas" : "▼ Ocultar subtareas"}
           </button>
@@ -125,12 +125,12 @@ export default function TaskCard({ task }) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-4 pl-4 border-l border-white/10 space-y-2 overflow-hidden"
+            className="mt-5 pl-4 border-l border-white/10 space-y-3 overflow-hidden"
           >
             {subtasks.map((s) => (
               <label
                 key={s.id}
-                className="flex items-center gap-2 text-sm cursor-pointer"
+                className="flex items-center gap-3 text-sm cursor-pointer"
                 onClick={(e) => e.stopPropagation()}
               >
                 <input
@@ -150,12 +150,12 @@ export default function TaskCard({ task }) {
             ))}
 
             {/* ADD SUBTASK */}
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-3">
               <input
                 className="
                   flex-1
-                  px-2 py-1
-                  rounded-md
+                  px-3 py-2
+                  rounded-lg
                   bg-[var(--bg-panel)]
                   text-sm
                   text-[var(--text-main)]
@@ -184,12 +184,12 @@ export default function TaskCard({ task }) {
                   setSubInput("");
                 }}
                 className="
-                  px-3
-                  rounded-md
+                  px-4
+                  rounded-lg
                   bg-[var(--pink-main)]
                   text-white
                   text-sm
-                  font-semibold
+                  font-bold
                   hover:bg-[var(--pink-strong)]
                   transition
                 "
@@ -203,6 +203,7 @@ export default function TaskCard({ task }) {
     </motion.div>
   );
 }
+
 
 
 
