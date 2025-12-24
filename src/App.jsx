@@ -1,6 +1,7 @@
 // src/App.jsx
 import React, { useState } from "react";
 import { useTasksStore } from "./context/useTasksStore";
+
 import DayColumn from "./components/DayColumn";
 import NewTaskDropdown from "./components/NewTaskDropdown";
 import ProgressBar from "./components/ProgressBar";
@@ -11,22 +12,29 @@ import bloomlyIcon from "./assets/bloomly-icon.png";
 
 export default function App() {
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-  const [filter, setFilter] = useState("all"); // all | pending | completed
+
+  const [filter, setFilter] = useState("all");
+  const [activeDay, setActiveDay] = useState("Lunes");
+
   const resetWeek = useTasksStore((s) => s.resetWeek);
 
   return (
-    <div className="p-6 flex flex-col gap-6">
-
-      {/* HEADER BLOOMLY */}
-      <header className="flex flex-col items-center gap-2">
+    <div
+      className="
+        px-4 py-6
+        md:px-6
+        flex flex-col gap-6
+      "
+    >
+      {/* HEADER */}
+      <header className="flex flex-col items-center gap-3">
         <div className="flex items-center gap-3">
           <img
             src={bloomlyIcon}
             alt="Bloomly"
-            className="w-18 h-18"
+            className="w-16 h-16"
           />
-
-          <h1 className="text-5xl font-semibold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">
             Bloomly
           </h1>
         </div>
@@ -36,29 +44,27 @@ export default function App() {
 
       {/* RESET */}
       <button
-          onClick={() => {
-            if (confirm("¿Resetear toda la semana?")) {
-              resetWeek();
-            }
-          }}
-          className="
-            self-center
-            text-s
-            px-6
-            py-3
-            rounded-full
-            bg-[var(--pink-main)]/10
-            text-[var(--pink-main)]
-            hover:bg-[var(--pink-main)]/20
-            transition
-          "
-        >
-          Reset semana
-        </button>
-
+        onClick={() => {
+          if (confirm("¿Resetear toda la semana?")) {
+            resetWeek();
+          }
+        }}
+        className="
+          self-center
+          text-sm
+          px-5 py-2
+          rounded-full
+          bg-[var(--pink-main)]/10
+          text-[var(--pink-main)]
+          hover:bg-[var(--pink-main)]/20
+          transition
+        "
+      >
+        Reset semana
+      </button>
 
       {/* FILTROS */}
-      <div className="flex gap-2 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         <FilterButton
           label="Todas"
           active={filter === "all"}
@@ -81,17 +87,56 @@ export default function App() {
         <NewTaskDropdown />
       </div>
 
-      {/* COLUMNAS */}
-      <div className="grid grid-cols-5 gap-4">
+      {/* MOBILE DAY SELECTOR */}
+      <div className="flex gap-2 overflow-x-auto sm:hidden pb-2">
         {days.map((day) => (
-          <DayColumn key={day} day={day} filter={filter} />
+          <button
+            key={day}
+            onClick={() => setActiveDay(day)}
+            className={`
+              px-4 py-2
+              rounded-full
+              whitespace-nowrap
+              text-sm
+              font-semibold
+              transition
+              ${
+                activeDay === day
+                  ? "bg-[var(--pink-main)] text-white"
+                  : "bg-[var(--bg-panel)] text-[var(--text-muted)]"
+              }
+            `}
+          >
+            {day}
+          </button>
         ))}
+      </div>
+
+      {/* COLUMNAS */}
+      <div
+        className="
+          grid
+          grid-cols-1
+          sm:grid-cols-2
+          lg:grid-cols-5
+          gap-4
+        "
+      >
+        {days
+          .filter(
+            (day) =>
+              window.innerWidth >= 640 || day === activeDay
+          )
+          .map((day) => (
+            <DayColumn key={day} day={day} filter={filter} />
+          ))}
       </div>
 
       <FocusOverlay />
     </div>
   );
 }
+
 
 
 

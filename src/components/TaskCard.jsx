@@ -52,7 +52,7 @@ export default function TaskCard({ task }) {
         {...listeners}
       >
         <div
-          className={`text-lg font-semibold leading-snug ${
+          className={`text-lg sm:text-lg font-semibold leading-snug ${
             task.completed ? "line-through opacity-60" : ""
           }`}
         >

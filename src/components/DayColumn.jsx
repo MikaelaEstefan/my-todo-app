@@ -43,7 +43,7 @@ export default function DayColumn({ day, filter }) {
     >
       {/* HEADER */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">
+        <h2 className="text-lg sm:text-xl font-semibold tracking-tight">
           {day}
         </h2>
 
