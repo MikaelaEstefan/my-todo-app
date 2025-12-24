@@ -1,5 +1,6 @@
 // src/App.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useThemeStore } from "./context/useThemeStore";
 import { useTasksStore } from "./context/useTasksStore";
 
 import DayColumn from "./components/DayColumn";
@@ -17,6 +18,11 @@ export default function App() {
   const [activeDay, setActiveDay] = useState("Lunes");
 
   const resetWeek = useTasksStore((s) => s.resetWeek);
+  const { theme, toggleTheme } = useThemeStore();
+
+    useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
 
   return (
     <div
@@ -37,6 +43,22 @@ export default function App() {
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">
             Bloomly
           </h1>
+          {/* THEME TOGGLE */}
+        <button
+          onClick={toggleTheme}
+          className="
+            ml-2
+            p-2
+            rounded-full
+            bg-[var(--bg-panel)]
+            text-[var(--text-main)]
+            hover:bg-[var(--bg-card)]
+            transition
+          "
+          title="Cambiar tema"
+        >
+          {theme === "dark" ? "🌙" : "☀️"}
+        </button>
         </div>
 
         <ProgressBar />

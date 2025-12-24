@@ -52,18 +52,26 @@ export default function TaskCard({ task }) {
         {...listeners}
       >
         <div
-          className={`text-lg sm:text-lg font-semibold leading-snug ${
-            task.completed ? "line-through opacity-60" : ""
-          }`}
-        >
+          className={`
+            text-base
+            font-semibold
+            leading-snug
+            ${
+              task.completed
+                ? "line-through opacity-60"
+                : "text-white drop-shadow-sm"
+            }
+          `}
+          >
           {task.text}
         </div>
+
 
         <input
           type="checkbox"
           checked={task.completed}
           onChange={() => toggleTask(task.id)}
-          className="w-5 h-5 mt-1 cursor-pointer accent-[var(--pink-main)]"
+          className="w-5 h-5 mt-1 cursor-pointer accent-[var(--pink-main)] brightness-125"
           onClick={(e) => e.stopPropagation()}
         />
       </div>
@@ -130,9 +138,15 @@ export default function TaskCard({ task }) {
             {subtasks.map((s) => (
               <label
                 key={s.id}
-                className="flex items-center gap-3 text-sm cursor-pointer"
+                className="
+                   flex items-center gap-2
+                  text-sm
+                  cursor-pointer
+                  text-white
+                "
                 onClick={(e) => e.stopPropagation()}
               >
+
                 <input
                   type="checkbox"
                   checked={s.completed}
@@ -140,12 +154,13 @@ export default function TaskCard({ task }) {
                   className="accent-[var(--pink-main)]"
                 />
                 <span
-                  className={`${
-                    s.completed ? "line-through opacity-60" : ""
-                  }`}
+                  className={`
+                    ${s.completed ? "line-through opacity-60" : "opacity-90"}
+                  `}
                 >
                   {s.text}
                 </span>
+
               </label>
             ))}
 

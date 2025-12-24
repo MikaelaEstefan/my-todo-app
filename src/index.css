@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @layer base {
+  /* =========================
+     DARK MODE (default)
+     ========================= */
   :root {
     --bg-main: #1C1A22;
     --bg-panel: #262331;
@@ -20,8 +23,33 @@
     --glow-pink: rgba(229, 142, 178, 0.35);
   }
 
+  /* =========================
+     LIGHT MODE
+     ========================= */
+  [data-theme="light"] {
+    --bg-main: #FBF7FA;
+    --bg-panel: #FFFFFF;
+    --bg-card: #F3EEF4;
+
+    --pink-main: #D16C8A;
+    --pink-strong: #B85A75;
+    --pink-soft: #F0B6CC;
+
+    --lavender: #9E90D8;
+    --green-soft: #8CCFB0;
+
+    --text-main: #1E1B22;
+    --text-muted: #6E6573;
+
+    --border-soft: rgba(0, 0, 0, 0.08);
+    --glow-pink: rgba(209, 108, 138, 0.25);
+  }
+
   body {
     @apply bg-[var(--bg-main)] text-[var(--text-main)];
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 }
 
