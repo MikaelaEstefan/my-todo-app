@@ -1,20 +1,20 @@
 # 🌸 Bloomly
 
-Bloomly es una aplicación de planificación semanal diseñada para organizar y llevar el registro de las tareas.
-Combina organización por días, prioridades, subtareas y un modo Focus.
+Bloomly is a weekly planning app designed to help organize and track tasks.  
+It combines day-based organization, priorities, subtasks, and a Focus mode.
 
-## Features
-- Organización semanal (Lunes a Viernes)
-- Filtros: todas / pendientes / completadas
-- Subtareas
-- Horario opcional
-- Prioridades (Alta / Media / Baja)
-- Focus Mode con timer
-- Barra de progreso semanal con feedback 
+## ✨ Features
+- Weekly planning (Monday to Friday)
+- Filters: all / pending / completed
+- Subtasks per task
+- Optional time scheduling
+- Priority levels (High / Medium / Low)
+- Focus Mode with timer
+- Weekly progress bar with motivational feedback
 - Light / Dark mode
-- Drag & Drop para reordenar tareas
+- Drag & Drop task reordering
 
-## Tech Stack
+## 🛠 Tech Stack
 - React
 - Vite
 - Tailwind CSS
@@ -22,14 +22,17 @@ Combina organización por días, prioridades, subtareas y un modo Focus.
 - Framer Motion
 - @dnd-kit
 
-## Demo
+## 🚀 Demo
 https://bloomly.vercel.app
 
-## Preview
-- Dark mode:
-![alt text](image.png)
-- Light mode:
-![alt text](image-1.png)
+## 📸 Preview
+**Dark mode:**  
+![Dark mode preview](image.png)
 
-Creado por Mikaela 
+**Light mode:**  
+![Light mode preview](image-1.png)
+
+## 👩‍💻 Author
+Created by **Mikaela Estefan**
+
 - GitHub: https://github.com/MikaelaEstefan
