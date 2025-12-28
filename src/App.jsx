@@ -1,7 +1,6 @@
-// src/App.jsx
-import React, { useState, useEffect } from "react";
-import { useThemeStore } from "./context/useThemeStore";
+import { useEffect, useState } from "react";
 import { useTasksStore } from "./context/useTasksStore";
+import { useThemeStore } from "./context/useThemeStore";
 
 import DayColumn from "./components/DayColumn";
 import NewTaskDropdown from "./components/NewTaskDropdown";
@@ -9,7 +8,8 @@ import ProgressBar from "./components/ProgressBar";
 import FocusOverlay from "./components/FocusOverlay";
 import FilterButton from "./components/FilterButton";
 
-import bloomlyIcon from "./assets/bloomly-icon.png";
+import bloomlyIconDark from "./assets/bloomly-icon.png";
+import bloomlyIconLight from "./assets/bloomly-icon-light.png";
 
 export default function App() {
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
@@ -20,45 +20,46 @@ export default function App() {
   const resetWeek = useTasksStore((s) => s.resetWeek);
   const { theme, toggleTheme } = useThemeStore();
 
-    useEffect(() => {
-      document.documentElement.setAttribute("data-theme", theme);
-    }, [theme]);
+  // aplicar theme al html
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  // logo según theme
+  const logoSrc =
+    theme === "light" ? bloomlyIconLight : bloomlyIconDark;
 
   return (
-    <div
-      className="
-        px-4 py-6
-        md:px-6
-        flex flex-col gap-6
-      "
-    >
+    <div className="px-4 py-6 md:px-6 flex flex-col gap-6">
       {/* HEADER */}
       <header className="flex flex-col items-center gap-3">
         <div className="flex items-center gap-3">
           <img
-            src={bloomlyIcon}
+            src={logoSrc}
             alt="Bloomly"
-            className="w-16 h-16"
+            className="w-16 h-16 transition-opacity"
           />
+
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">
             Bloomly
           </h1>
+
           {/* THEME TOGGLE */}
-        <button
-          onClick={toggleTheme}
-          className="
-            ml-2
-            p-2
-            rounded-full
-            bg-[var(--bg-panel)]
-            text-[var(--text-main)]
-            hover:bg-[var(--bg-card)]
-            transition
-          "
-          title="Cambiar tema"
-        >
-          {theme === "dark" ? "🌙" : "☀️"}
-        </button>
+          <button
+            onClick={toggleTheme}
+            className="
+              ml-2
+              p-2
+              rounded-full
+              bg-[var(--bg-panel)]
+              text-[var(--text-main)]
+              hover:bg-[var(--bg-card)]
+              transition
+            "
+            title="Cambiar tema"
+          >
+            {theme === "dark" ? "🌙" : "☀️"}
+          </button>
         </div>
 
         <ProgressBar />
@@ -135,15 +136,7 @@ export default function App() {
       </div>
 
       {/* COLUMNAS */}
-      <div
-        className="
-          grid
-          grid-cols-1
-          sm:grid-cols-2
-          lg:grid-cols-5
-          gap-4
-        "
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {days
           .filter(
             (day) =>
@@ -158,6 +151,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
