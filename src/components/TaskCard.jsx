@@ -1,4 +1,3 @@
-// src/components/TaskCard.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
@@ -6,8 +5,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { useTasksStore } from "../context/useTasksStore";
 
 export default function TaskCard({ task }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef, 
+    transform,
+    transition,
+  } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -41,38 +46,39 @@ export default function TaskCard({ task }) {
         rounded-2xl
         p-5
         text-[var(--text-main)]
-        select-none
         transition-all
         ${task.completed ? "opacity-50 saturate-50" : ""}
       `}
     >
       {/* HEADER */}
-      <div
-        className="flex justify-between items-start gap-3 cursor-grab"
-        {...listeners}
-      >
+      <div className="flex justify-between items-start gap-3">
+        
+        {/* SOLO ESTO ES DRAG HANDLE */}
         <div
+          ref={setActivatorNodeRef}
+          {...listeners}
           className={`
-            text-base
-            font-semibold
-            leading-snug
+            text-base font-semibold leading-snug cursor-grab select-none
             ${
               task.completed
                 ? "line-through opacity-60"
                 : "text-white drop-shadow-sm"
             }
           `}
-          >
+        >
           {task.text}
         </div>
 
-
+        {/* CHECKBOX */}
         <input
           type="checkbox"
           checked={task.completed}
           onChange={() => toggleTask(task.id)}
-          className="w-5 h-5 mt-1 cursor-pointer accent-[var(--pink-main)] brightness-125"
-          onClick={(e) => e.stopPropagation()}
+          className="
+            w-5 h-5 mt-1 cursor-pointer
+            accent-[var(--pink-main)]
+            pointer-events-auto
+          "
         />
       </div>
 
@@ -98,10 +104,7 @@ export default function TaskCard({ task }) {
             startFocus(task.id);
           }}
           className="
-            px-5 py-2
-            rounded-full
-            text-sm
-            font-semibold
+            px-5 py-2 rounded-full text-sm font-semibold
             bg-[var(--pink-main)]/20
             text-[var(--pink-main)]
             hover:bg-[var(--pink-main)]/30
@@ -138,29 +141,17 @@ export default function TaskCard({ task }) {
             {subtasks.map((s) => (
               <label
                 key={s.id}
-                className="
-                   flex items-center gap-2
-                  text-sm
-                  cursor-pointer
-                  text-white
-                "
-                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 text-sm cursor-pointer"
               >
-
                 <input
                   type="checkbox"
                   checked={s.completed}
                   onChange={() => toggleSubtask(task.id, s.id)}
                   className="accent-[var(--pink-main)]"
                 />
-                <span
-                  className={`
-                    ${s.completed ? "line-through opacity-60" : "opacity-90"}
-                  `}
-                >
+                <span className={s.completed ? "line-through opacity-60" : ""}>
                   {s.text}
                 </span>
-
               </label>
             ))}
 
@@ -168,22 +159,17 @@ export default function TaskCard({ task }) {
             <div className="flex gap-2 pt-3">
               <input
                 className="
-                  flex-1
-                  px-3 py-2
-                  rounded-lg
+                  flex-1 px-3 py-2 rounded-lg
                   bg-[var(--bg-panel)]
-                  text-sm
-                  text-[var(--text-main)]
+                  text-sm text-[var(--text-main)]
                   placeholder:text-[var(--text-muted)]
                   border border-[var(--border-soft)]
-                  focus:outline-none
-                  focus:border-[var(--pink-main)]
+                  focus:outline-none focus:border-[var(--pink-main)]
                 "
                 placeholder="Nueva subtarea…"
                 value={subInput}
                 onChange={(e) => setSubInput(e.target.value)}
                 onKeyDown={(e) => {
-                  e.stopPropagation();
                   if (e.key === "Enter" && subInput.trim()) {
                     addSubtask(task.id, subInput.trim());
                     setSubInput("");
@@ -192,19 +178,14 @@ export default function TaskCard({ task }) {
               />
 
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   if (!subInput.trim()) return;
                   addSubtask(task.id, subInput.trim());
                   setSubInput("");
                 }}
                 className="
-                  px-4
-                  rounded-lg
-                  bg-[var(--pink-main)]
-                  text-white
-                  text-sm
-                  font-bold
+                  px-4 rounded-lg bg-[var(--pink-main)]
+                  text-white text-sm font-bold
                   hover:bg-[var(--pink-strong)]
                   transition
                 "
@@ -218,6 +199,7 @@ export default function TaskCard({ task }) {
     </motion.div>
   );
 }
+
 
 
 
